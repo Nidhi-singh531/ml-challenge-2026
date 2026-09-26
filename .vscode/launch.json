@@ -1,0 +1,102 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "0 · make subset (fast dev data)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/business_entity_resolution/src/make_subset.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": ["--data-dir", "dataset/train", "--out", "dataset/mini",
+               "--clusters", "8000", "--distractors", "120000"]
+    },
+    {
+      "name": "1 · mine aliases (mini)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/business_entity_resolution/src/aliases.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": ["--data-dir", "dataset/mini", "--prefix", "train",
+               "--ground-truth", "dataset/mini/train_ground_truth.tsv",
+               "--out", "work/aliases.tsv"]
+    },
+    {
+      "name": "2 · blocking (mini)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/business_entity_resolution/src/blocking.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": ["--data-dir", "dataset/mini", "--prefix", "train",
+               "--out", "work/mini/candidate_pairs.tsv", "--topk", "50",
+               "--name-topk", "25", "--aliases", "work/aliases.tsv"]
+    },
+    {
+      "name": "3 · build features (mini)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/business_entity_resolution/src/pipeline.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": ["build", "--data-dir", "dataset/mini", "--prefix", "train",
+               "--cand-scores", "work/mini/candidate_pairs_scores",
+               "--ground-truth", "dataset/mini/train_ground_truth.tsv",
+               "--aliases", "work/aliases.tsv", "--out", "work/mini/pairs.npz",
+               "--workers", "1"]
+    },
+    {
+      "name": "4 · train (mini)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/business_entity_resolution/src/pipeline.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": ["train", "--pairs", "work/mini/pairs.npz",
+               "--ground-truth", "dataset/mini/train_ground_truth.tsv",
+               "--out", "work/mini/model.pkl"]
+    },
+    {
+      "name": "5 · predict (mini)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/business_entity_resolution/src/pipeline.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": ["predict", "--pairs", "work/mini/pairs.npz",
+               "--model", "work/mini/model.pkl",
+               "--source1", "dataset/mini/train_source1.tsv",
+               "--out", "work/mini/matching_results.tsv"]
+    },
+    {
+      "name": "6 · error analysis (mini)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/code/business_entity_resolution/src/analyze.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": false,
+      "args": ["errors", "--pairs", "work/mini/pairs.npz",
+               "--model", "work/mini/model.pkl",
+               "--ground-truth", "dataset/mini/train_ground_truth.tsv",
+               "--data-dir", "dataset/mini"]
+    },
+    {
+      "name": "V · validate submission",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/utils/validate_submission.py",
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "args": ["-m", "output/matching_results.tsv",
+               "-c", "output/candidate_pairs.tsv", "-t", "dataset/test"]
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+  "python.analysis.extraPaths": ["code/business_entity_resolution/src"],
+  "python.terminal.activateEnvironment": true,
+  "files.exclude": { "**/__pycache__": true },
+  "files.associations": { "*.tsv": "plaintext" },
+  "editor.rulers": [88],
+  "[python]": { "editor.formatOnSave": false }
+}

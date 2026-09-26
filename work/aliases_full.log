@@ -1,0 +1,30 @@
+﻿[aliases] 400000 clusters, 1866735 records to load
+[aliases] 2241247 candidate pairs from 400000 clusters
+[aliases] wrote 1708 aliases -> work/aliases_full.tsv
+
+[aliases] sample:
+                       'लिमिटेड' -> 'limited'            (count 167077, score 67.6)
+                      'प्राइवेट' -> 'private'            (count 141801, score 81.5)
+                            'st' -> 'street'             (count 82912, score 6.8)
+                            'rd' -> 'road'               (count 80563, score 4.8)
+                            'dr' -> 'drive'              (count 74291, score 8.1)
+                           'ave' -> 'avenue'             (count 60560, score 11.6)
+                            'mh' -> 'maharashtra'        (count 43772, score 11.5)
+                            'ln' -> 'lane'               (count 31272, score 20.1)
+                          'york' -> 'ny'                 (count 31240, score 21.3)
+                          'प्रा' -> 'pvt'                (count 31108, score 288.8)
+                            'लि' -> 'ltd'                (count 31108, score 226.4)
+                    'महाराष्ट्र' -> 'maharashtra'        (count 29695, score 11.5)
+                            'dl' -> 'delhi'              (count 27953, score 18.0)
+                          'ohio' -> 'oh'                 (count 25630, score 26.0)
+                      'లిమిటెడ్' -> 'limited'            (count 24644, score 48.7)
+                      'ಲಿಮಿಟೆಡ್' -> 'limited'            (count 23021, score 48.6)
+                      'லிமிடெட்' -> 'limited'            (count 22120, score 49.2)
+                     'ప్రైవేట్' -> 'private'            (count 21064, score 55.8)
+                       'લિમિટેડ' -> 'limited'            (count 19824, score 67.6)
+                       'লিমিটেড' -> 'limited'            (count 19602, score 48.0)
+                    'ಪ್ರೈವೇಟ್' -> 'private'            (count 19313, score 55.3)
+                      'பிரைவேட்' -> 'private'            (count 18852, score 56.4)
+                        'दिल्ली' -> 'delhi'              (count 18584, score 18.0)
+                            'ct' -> 'court'              (count 18521, score 36.1)
+                      'પ્રાઇવેટ' -> 'private'            (count 16852, score 81.6)

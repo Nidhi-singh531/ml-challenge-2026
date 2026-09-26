@@ -1,0 +1,45 @@
+﻿[blocking] 3000 source-1 entities, 10445 true links, 207472 candidate pairs
+  recall@30  = 0.5877   (30.0 candidates per entity, ranked by `all` score)
+  recall@50  = 0.7824   (50.0 candidates per entity, ranked by `all` score)
+  recall@75  = 0.9686   (69.2 candidates per entity, ranked by `all` score)
+  name channel alone     : 0.6859
+  union of both channels : 0.9686   (69.2 candidates per entity)
+
+[blocking] 328 true links never retrieved, over 270 entities
+
+  S1 'Oncology Metro Health' | 'Round Rock, 2977 Bridekirk Drive, TX'
+     MISS S3 'Oncology Metro Hesglmh' | ''
+
+  S1 'Ernakulam Assets Private Limited' | '14/291 H, Ernakulam, Kerala, Suite 28A 1St Floor A Square Edathala, P.O. Kuzhivelippady, Ernakulam'
+     MISS S3 'Brixhalo' | 'Door No 14/291 H, Ernakulam, KL'
+
+  S1 'Krish Industries Pvt Ltd' | '64-C, Pocket-6 Mig Flats, Mayur Vihar Ph-3, Delhi East, East Delhi, Delhi'
+     MISS S3 'Krish Pvt Pvt Ltd Service' | '#03 64-C, <NULL>, Delhi East, East Delhi, DL'
+
+  S1 'Pune Technologies Private Limited' | '64/10, Anant Appt, Prabhat Road, 14Th Lane, Income Tax Lane, Pune, Maharashtra'
+     MISS S3 'Pune Technologies Private Ltd' | '#64/10, Pune, Poona, MH'
+
+  S1 'Digital Consultants Private Limited' | 'Fl. E-202, Park Xpress, Baner Balewadi Link Road, Pune City, Pune, Maharashtra'
+     MISS S2 'privateconsultants.com' | 'FL. E-202, PUNE CITY, PUNE, Maharashtra'
+     MISS S3 'Digital Consultants Private' | 'Fl. E-202, Pune City, Pune, MH'
+
+  S1 'Ridge Fellowship' | '409 4th Street, Galena, MO'
+     MISS S2 '#ridgefellowship' | '4TH STREET, GALEA, MO'
+
+  S1 'Orange (India) Tracon Limited' | 'Shree Krishna Nagar, Plot No.8, Kankroli, Bhilwara Road, Rajsamand, Rajasthan'
+     MISS S3 'orangeindiatracon.com' | 'Shree Krishna Nagar, Rajsamand, RJ'
+
+  S1 'Consultants Om Management Private Limited' | 'C-2/194 - Block C-Ii, New Ashok Nagar, Delhi, West Delhi, Delhi'
+     MISS S3 'Vioriza' | 'C-2/19 - Block C-ii, New Ashok Nagar, Delhi, West Delhi, DL'
+
+  S1 'Modern Ventures Private Limited' | '202, Adarsh Nagar Ajmer Road, Beawar, Ajmer, Rajasthan'
+     MISS S3 'M/s Modern Vetrers Private Limited' | '202, Ajmer, RJ'
+
+  S1 'Distasio, Mcpeak & Wallace Systems' | '5163 Oakland Avenue, Milwaukie, OR'
+     MISS S3 'Distasiomcpeakwallace.Com' | 'Oregon, Milwaukie, Oakland Ave'
+
+  S1 'Indian Infrastructure Pvt Ltd' | '45, 1St Flr, K No. 1647/, 1424/45, Alankar Plaza, Bangalore South, Bangalore, Karnataka'
+     MISS S2 'ಇಂಡಿಯನ್ ಇನ್\u200cಫ್ರಾಸ್ಟ್ರಕ್ಚರ್ ಪ್ರೈವೇಟ್ ಲಿಮಿಟೆಡ್' | 'BANGALORE SOUTH, BANGALORE, 45, ಕರ್ನಾಟಕ'
+
+  S1 'Creative Consulting Pvt Ltd' | 'Sagar Agro Foods 72/A Mumbai Benglore Highway, Vadgaon (Bk), Pune, Maharashtra'
+     MISS S3 'Creative Consulting' | ''

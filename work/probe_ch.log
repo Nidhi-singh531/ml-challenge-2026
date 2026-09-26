@@ -1,0 +1,18 @@
+﻿[blocking] alias lexicon: 1708 entries
+[blocking] tokenised 2000000 targets (159s)
+[blocking] tokenised 4000000 targets (319s)
+[blocking] tokenised 6000000 targets (445s)
+[blocking] tokenised 8000000 targets (568s)
+[blocking] tokenised 10000000 targets (698s)
+[blocking] saved token cache work/tokcache_train.npz
+[blocking] vocabulary {'all': 2010314, 'name': 24567243}; countries ['India', 'US']; ready in 856s
+[blocking] querying a sample of 3000/2206821 source-1 records against the full target pool
+[blocking] India/all: 4133346 targets, 894649 indexed tokens (894649 generating), top-50
+[blocking] India/name: 4133346 targets, 10537176 indexed tokens (10537176 generating), top-25
+[blocking] India: 1193 queries
+[blocking] India: 1193/1193 queries (69s, 57.5 ms/query)
+[blocking] US/all: 6186873 targets, 1223028 indexed tokens (1223028 generating), top-50
+[blocking] US/name: 6186873 targets, 14203597 indexed tokens (14203597 generating), top-25
+[blocking] US: 1807 queries
+[blocking] US: 1807/1807 queries (74s, 40.8 ms/query)
+[blocking] 207472 candidate pairs (69.2 per source-1 entity) -> work/probe/cp_ch_scores.npz; total 1018s

@@ -1,0 +1,54 @@
+# Local environments and tooling
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.history/
+.agents/
+.codex/
+
+# Credentials and local secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.aws/
+
+# Original challenge data and generated submissions
+/dataset/
+/output/
+
+# Large intermediate data and archives
+*.npz
+*.npy
+*.pkl
+*.joblib
+*.zip
+*.tgz
+*.tar
+*.gz
+
+# Keep only recovery-relevant artifacts from the working directory
+/work/*
+!/work/runlog.txt
+!/work/aliases*.tsv
+!/work/*.log
+!/work/dev/
+/work/dev/*
+!/work/dev/*.log
+!/work/dev/*.err
+!/work/dev/*.ps1
+!/work/dev/model40k.pkl
+!/work/aws/
+/work/aws/*
+!/work/aws/*.sh
+
+# OS files
+Thumbs.db
+.DS_Store

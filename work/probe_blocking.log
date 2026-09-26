@@ -1,0 +1,18 @@
+﻿[blocking] alias lexicon: 789 entries
+[blocking] querying a sample of 3000/2206821 source-1 records against the full target pool
+[blocking] tokenised 1000000 targets (29s)
+[blocking] tokenised 2000000 targets (57s)
+[blocking] tokenised 3000000 targets (90s)
+[blocking] tokenised 4000000 targets (123s)
+[blocking] tokenised 5000000 targets (151s)
+[blocking] tokenised 6000000 targets (184s)
+[blocking] tokenised 7000000 targets (215s)
+[blocking] tokenised 8000000 targets (244s)
+[blocking] tokenised 9000000 targets (271s)
+[blocking] tokenised 10000000 targets (304s)
+[blocking] vocabulary 2011233; countries ['India', 'US']; tokenising done in 315s
+[blocking] India: 4133346 targets, 895517 indexed tokens, 1193 queries
+[blocking] India: 1193/1193 queries (52s, 43.4 ms/query)
+[blocking] US: 6186873 targets, 1223327 indexed tokens, 1807 queries
+[blocking] US: 1807/1807 queries (58s, 31.9 ms/query)
+[blocking] 225000 candidate pairs (75.0 per source-1 entity) -> work/probe/candidate_pairs_scores.npz; total 434s
