@@ -1,0 +1,6 @@
+[predict] France: threshold 0.725 (UNSEEN -> conservative)
+[predict] India: threshold 0.700 (learned)
+[predict] US: threshold 0.725 (learned)
+[predict] 10121272 scored pairs -> output/matching_results.tsv (105753 entities predicted as singletons)
+[predict] 5019247 links with p >= 0.98 -> work/test_confident.tsv
+[predict] candidate set -> output/candidate_pairs.tsv

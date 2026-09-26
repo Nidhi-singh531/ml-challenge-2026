@@ -91,7 +91,10 @@ def cmd_errors(pairs_npz, model_path, gt_path, data_dir=None, prefix="train",
         bundle = pickle.load(f)
     clf = bundle["model"]
 
-    val_ids = val_split(P["entities"])
+    if bundle.get("refit", False):
+        raise ValueError("refitted models have seen validation labels; use the saved validation model")
+    val_ids = set(bundle["validation_ids"].tolist()) if "validation_ids" in bundle \
+        else val_split(P["entities"])
     is_val = np.isin(left, np.fromiter(val_ids, np.int64))
     Xv, yv, lv, rv = X[is_val], y[is_val], left[is_val], right[is_val]
     prob = clf.predict_proba(Xv)[:, 1]

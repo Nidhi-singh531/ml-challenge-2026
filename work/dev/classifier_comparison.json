@@ -1,0 +1,109 @@
+{
+  "baseline": {
+    "all": {
+      "entities": 10000,
+      "macro_f05": 0.9628508555589061,
+      "false_links": 401,
+      "missed_links": 2593,
+      "false_singleton_merges": 36
+    },
+    "shared_core_name": {
+      "entities": 5247,
+      "macro_f05": 0.9528220379352932,
+      "false_links": 224,
+      "missed_links": 1782,
+      "false_singleton_merges": 21
+    },
+    "empty_address_candidate": {
+      "entities": 2311,
+      "macro_f05": 0.9543396480553027,
+      "false_links": 129,
+      "missed_links": 833,
+      "false_singleton_merges": 8
+    }
+  },
+  "baseline_calibrated": {
+    "all": {
+      "entities": 10000,
+      "macro_f05": 0.9628508555589061,
+      "false_links": 401,
+      "missed_links": 2593,
+      "false_singleton_merges": 36
+    },
+    "shared_core_name": {
+      "entities": 5247,
+      "macro_f05": 0.9528220379352932,
+      "false_links": 224,
+      "missed_links": 1782,
+      "false_singleton_merges": 21
+    },
+    "empty_address_candidate": {
+      "entities": 2311,
+      "macro_f05": 0.9543396480553027,
+      "false_links": 129,
+      "missed_links": 833,
+      "false_singleton_merges": 8
+    },
+    "paired_delta_vs_baseline": 0.0,
+    "paired_bootstrap_95pct": [
+      0.0,
+      0.0
+    ]
+  },
+  "larger_baseline": {
+    "all": {
+      "entities": 10000,
+      "macro_f05": 0.9673822134159291,
+      "false_links": 287,
+      "missed_links": 2420,
+      "false_singleton_merges": 23
+    },
+    "shared_core_name": {
+      "entities": 5247,
+      "macro_f05": 0.9573550702383181,
+      "false_links": 160,
+      "missed_links": 1694,
+      "false_singleton_merges": 15
+    },
+    "empty_address_candidate": {
+      "entities": 2311,
+      "macro_f05": 0.9601297367232788,
+      "false_links": 89,
+      "missed_links": 791,
+      "false_singleton_merges": 5
+    },
+    "paired_delta_vs_baseline": 0.004531357857022694,
+    "paired_bootstrap_95pct": [
+      0.0032763141841880695,
+      0.005844011195297997
+    ]
+  },
+  "ambiguity": {
+    "all": {
+      "entities": 10000,
+      "macro_f05": 0.9693454784563668,
+      "false_links": 310,
+      "missed_links": 2201,
+      "false_singleton_merges": 24
+    },
+    "shared_core_name": {
+      "entities": 5247,
+      "macro_f05": 0.9600248546794866,
+      "false_links": 180,
+      "missed_links": 1598,
+      "false_singleton_merges": 13
+    },
+    "empty_address_candidate": {
+      "entities": 2311,
+      "macro_f05": 0.9604274667273611,
+      "false_links": 124,
+      "missed_links": 716,
+      "false_singleton_merges": 5
+    },
+    "paired_delta_vs_baseline": 0.006494622897460056,
+    "paired_bootstrap_95pct": [
+      0.00520930915793748,
+      0.007871766687478382
+    ]
+  }
+}

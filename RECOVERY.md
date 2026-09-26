@@ -2,11 +2,14 @@
 
 This backup contains the pipeline source, README, dependencies, VS Code
 settings, validator, experiment logs, alias lexicons, helper scripts, and
-the current `work/dev/model40k.pkl` model.
+the baseline `work/dev/model40k.pkl` model and, after the next backup,
+the optimized `work/dev/model_optimized.pkl` model and classifier reports.
 
-Current measured validation macro F0.5 is 0.9629 with the prefilter, on
-10,000 held-out entities. See `work/dev/train40k.log` and the project README
-for details and remaining work.
+The selected larger-data model measured macro F0.5 0.96738221 on the original
+10,000 held-out entities before refitting on all 200,000 entities. Keep using
+`work/dev/model40k.pkl` as the fixed prefilter during feature building; use
+`work/dev/model_optimized.pkl` for prediction with the default 47 features.
+See `work/dev/classifier_selection.json` and the project README for details.
 
 ## Restore
 

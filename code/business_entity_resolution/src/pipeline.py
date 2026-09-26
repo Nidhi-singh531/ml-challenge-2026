@@ -18,6 +18,7 @@ Ids are int64-encoded (``blocking.encode_id``) throughout.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import glob
 import multiprocessing as mp
 import os
@@ -114,15 +115,23 @@ def _text_chunk(chunk):
     """chunk: list of ((name, addr), [(name, addr), ...]) -> float32 matrix."""
     rows = []
     cache = {}
-    for (an, aa), cands in chunk:
+    width = len(F.TEXT_FEATURE_NAMES)
+    for source, cands in chunk:
+        an, aa = source[:2]
         a = F.RecordView(an, aa, _AMAP)
-        for bn, ba in cands:
+        for candidate in cands:
+            bn, ba = candidate[:2]
             key = (bn, ba)
             b = cache.get(key)
             if b is None:
                 b = cache[key] = F.RecordView(bn, ba, _AMAP)
-            rows.append(F.text_features(a, b))
-    return np.asarray(rows, np.float32).reshape(-1, len(F.TEXT_FEATURE_NAMES))
+            row = F.text_features(a, b)
+            if len(source) == 3:
+                import ambiguity
+                row += ambiguity.pair_features(a, b, source[2], candidate[2])
+            width = len(row)
+            rows.append(row)
+    return np.asarray(rows, np.float32).reshape(-1, width)
 
 
 def prefilter_proba(bundle, ctx):
@@ -181,7 +190,7 @@ class TextStore:
 
 def build(data_dir, prefix, cand_scores_path, out_npz, gt_path=None, max_s1=None,
           aliases=None, workers=None, prefilter=None, part_pairs=2_000_000,
-          seed=0, chunk_pairs=4000):
+          seed=0, chunk_pairs=4000, ambiguity_features=False):
     t0 = time.time()
     meta = load_meta(cand_scores_path)
     parts = score_parts(cand_scores_path)
@@ -201,6 +210,16 @@ def build(data_dir, prefix, cand_scores_path, out_npz, gt_path=None, max_s1=None
 
     store = TextStore(data_dir, prefix)
     ent_country = store.country(entities)
+    extra_names = []
+    counts = None
+    if ambiguity_features:
+        import ambiguity
+        import ertext
+        counts = ambiguity.NameCounts(
+            os.path.join(data_dir, f"{prefix}_source1.tsv"), ertext.load_aliases(aliases))
+        extra_names = ambiguity.FEATURE_NAMES
+        print(f"[build] classifier name counts ready ({time.time() - t0:.0f}s)", flush=True)
+    feature_names = F.FEATURE_NAMES + extra_names
     print(f"[build] {len(entities)} entities, texts loaded ({time.time() - t0:.0f}s)")
 
     gt = load_ground_truth_codes(gt_path, set(entities.tolist())) if gt_path else None
@@ -236,8 +255,13 @@ def build(data_dir, prefix, cand_scores_path, out_npz, gt_path=None, max_s1=None
             starts = np.flatnonzero(np.r_[True, left[1:] != left[:-1]]) \
                 if len(left) else np.zeros(0, np.int64)
             for lo, hi in zip(starts, np.r_[starts[1:], len(left)]):
-                cur.append((store.get(left[lo]),
-                            [store.get(c) for c in right[lo:hi]]))
+                source = store.get(left[lo])
+                candidates = [store.get(c) for c in right[lo:hi]]
+                if counts is not None:
+                    country = store.country([left[lo]])[0]
+                    source += (counts.get(source[0], country),)
+                    candidates = [r + (counts.get(r[0], country),) for r in candidates]
+                cur.append((source, candidates))
                 cur_n += hi - lo
                 if cur_n >= chunk_pairs:
                     chunks.append(cur)
@@ -246,10 +270,11 @@ def build(data_dir, prefix, cand_scores_path, out_npz, gt_path=None, max_s1=None
                 chunks.append(cur)
             T = [t for t in pool.imap(_text_chunk, chunks, chunksize=1)]
             T = np.concatenate(T) if T else \
-                np.zeros((0, len(F.TEXT_FEATURE_NAMES)), np.float32)
+                np.zeros((0, len(F.TEXT_FEATURE_NAMES) + len(extra_names)), np.float32)
             assert len(T) == len(left)
-            X = np.hstack([T, ctx])
-            assert X.shape[1] == len(F.FEATURE_NAMES), (
+            nt = len(F.TEXT_FEATURE_NAMES)
+            X = np.hstack([T[:, :nt], ctx, T[:, nt:]])
+            assert X.shape[1] == len(feature_names), (
                 "text + context widths do not match FEATURE_NAMES - keep aligned")
             y = np.zeros(0, np.int8)
             if gt is not None:
@@ -265,8 +290,9 @@ def build(data_dir, prefix, cand_scores_path, out_npz, gt_path=None, max_s1=None
             del sc, cb, d
 
     np.savez(out_npz, entities=entities, entity_country=ent_country,
-             names=np.asarray(F.FEATURE_NAMES), n_parts=n_part)
-    print(f"[build] {n_kept} pairs, {len(F.FEATURE_NAMES)} features, "
+             names=np.asarray(feature_names), n_parts=n_part,
+             prefilter_sha256=file_sha256(prefilter) if pre is not None else "")
+    print(f"[build] {n_kept} pairs, {len(feature_names)} features, "
           f"{n_part} part(s) -> {out_npz} ({time.time() - t0:.0f}s)")
     if gt is not None:
         n_true = sum(len(v) for v in gt.values())
@@ -352,6 +378,11 @@ def val_split(entities, val_frac=0.25, seed=0):
 GRID = np.concatenate([np.arange(0.05, 0.90, 0.025), np.arange(0.90, 0.995, 0.01)])
 
 
+def file_sha256(path):
+    with open(path, "rb") as f:
+        return hashlib.file_digest(f, "sha256").hexdigest()
+
+
 def sweep(left, right, prob, gt_val, one_to_one, grid=GRID):
     scores = [macro_f05(assign(left, right, prob, t, one_to_one), gt_val)
               for t in grid]
@@ -361,7 +392,7 @@ def sweep(left, right, prob, gt_val, one_to_one, grid=GRID):
 
 def train(pairs_npz, gt_path, model_out, val_frac=0.25, one_to_one=True,
           refit=False, n_estimators=500, prefilter_recall=0.999,
-          unseen="max", drop=()):
+          unseen="max", drop=(), validation_from=None, fixed_prefilter=None):
     P = load_pairs(pairs_npz)
     X, y, left, right = P["X"], P["y"].astype(int), P["left"], P["right"]
     entities, ent_country = P["entities"], P["entity_country"]
@@ -378,7 +409,17 @@ def train(pairs_npz, gt_path, model_out, val_frac=0.25, one_to_one=True,
     for e in entities.tolist():  # entities with no truth row are singletons
         gt.setdefault(e, set())
 
-    val_ids = val_split(entities, val_frac)
+    val_ids = val_split(load_manifest(validation_from)["entities"], val_frac) \
+        if validation_from else val_split(entities, val_frac)
+    if not val_ids or not val_ids.issubset(set(entities.tolist())):
+        raise ValueError("validation entities must be a nonempty subset of this dataset")
+    print(f"[train] {len(entities) - len(val_ids)} train / {len(val_ids)} validation entities", flush=True)
+    fixed_pre = None
+    if fixed_prefilter:
+        if str(P.get("prefilter_sha256", "")) != file_sha256(fixed_prefilter):
+            raise ValueError("feature build must use the same fixed prefilter model")
+        with open(fixed_prefilter, "rb") as f:
+            fixed_pre = pickle.load(f)["prefilter"]
     is_val = np.isin(left, np.fromiter(val_ids, np.int64))
     country = pair_country(left, entities, ent_country)
 
@@ -425,12 +466,14 @@ def train(pairs_npz, gt_path, model_out, val_frac=0.25, one_to_one=True,
     # Cheap (no text needed), so the test build can drop most blocking pairs
     # before the expensive text features. Threshold keeps `prefilter_recall`
     # of the validation pairs the full model accepts.
-    n_text = len(F.TEXT_FEATURE_NAMES)
-    pre = _make_clf(200)
-    pre.fit(X[~is_val, n_text:], y[~is_val])
-    p1 = pre.predict_proba(X[is_val, n_text:])[:, 1]
+    ctx_cols = [names.index(n) for n in F.CONTEXT_FEATURE_NAMES]
+    pre = fixed_pre["model"] if fixed_pre else _make_clf(200)
+    if fixed_pre is None:
+        pre.fit(X[~is_val][:, ctx_cols], y[~is_val])
+    p1 = pre.predict_proba(X[is_val][:, ctx_cols])[:, 1]
     accepted = (prob >= thr_pair) & (y[is_val] == 1)
-    t1 = float(np.quantile(p1[accepted], 1 - prefilter_recall)) if accepted.any() else 0.0
+    t1 = fixed_pre["threshold"] if fixed_pre else (
+        float(np.quantile(p1[accepted], 1 - prefilter_recall)) if accepted.any() else 0.0)
     kept = p1 >= t1
     s_pre = macro_f05(assign(lv[kept], rv[kept], prob[kept], thr_pair[kept],
                              one_to_one), gt_val)
@@ -440,18 +483,22 @@ def train(pairs_npz, gt_path, model_out, val_frac=0.25, one_to_one=True,
     if refit:
         clf = _make_clf(n_estimators)
         clf.fit(X, y)
-        pre = _make_clf(200)
-        pre.fit(X[:, n_text:], y)
+        if fixed_pre is None:
+            pre = _make_clf(200)
+            pre.fit(X[:, ctx_cols], y)
         print(f"[train] refitted on all {len(y)} pairs")
 
     with open(model_out, "wb") as f:
         pickle.dump({"model": clf, "threshold": t_glob, "thresholds": thresholds,
                      "default_threshold": default, "one_to_one": one_to_one,
                      "features": names,
+                     "validation_ids": np.asarray(sorted(val_ids), np.int64),
+                     "refit": refit,
+                     "fixed_prefilter_sha256": file_sha256(fixed_prefilter) if fixed_pre else "",
                      "prefilter": {"model": pre, "threshold": t1}}, f)
     print(f"[train] saved {model_out}; thresholds {thresholds}, "
           f"unseen countries -> {default:.3f}")
-    return {"val": s_pc, "val_global": s_glob,
+    return {"val": s_pc, "val_global": s_glob, "val_prefilter": s_pre,
             "oracle": macro_f05(oracle, gt_val)}
 
 
@@ -475,6 +522,11 @@ def predict(pairs_npz, model_path, s1_path, out_path, threshold=None,
     with open(model_path, "rb") as f:
         bundle = pickle.load(f)
     man = load_manifest(pairs_npz)
+    if list(man["names"]) != list(bundle["features"]):
+        raise ValueError("feature schema differs from model; rebuild with matching feature flags")
+    expected_pre = bundle.get("fixed_prefilter_sha256", "")
+    if expected_pre and str(man.get("prefilter_sha256", "")) != expected_pre:
+        raise ValueError("features must be built with the model's fixed prefilter")
     left, right, prob = score_pairs(pairs_npz, bundle["model"])
     country = pair_country(left, man["entities"], man["entity_country"])
     if threshold is not None:
@@ -554,6 +606,7 @@ if __name__ == "__main__":
     b.add_argument("--workers", type=int)
     b.add_argument("--prefilter", help="model.pkl whose stage-1 prefilter to apply")
     b.add_argument("--seed", type=int, default=0)
+    b.add_argument("--ambiguity-features", action="store_true")
 
     t = sub.add_parser("train")
     t.add_argument("--pairs", required=True)
@@ -563,6 +616,8 @@ if __name__ == "__main__":
     t.add_argument("--refit", action="store_true",
                    help="after validation, refit on all pairs (final model)")
     t.add_argument("--n-estimators", type=int, default=500)
+    t.add_argument("--validation-from", help="reuse the validation split from this manifest")
+    t.add_argument("--fixed-prefilter", help="retain the exact prefilter used during build")
     t.add_argument("--unseen", choices=["max", "global"], default="max",
                    help="threshold for countries absent from training")
     t.add_argument("--drop-features", nargs="+", default=[],
@@ -588,11 +643,13 @@ if __name__ == "__main__":
     a = ap.parse_args()
     if a.cmd == "build":
         build(a.data_dir, a.prefix, a.cand_scores, a.out, a.ground_truth,
-              a.max_s1, a.aliases, a.workers, a.prefilter, seed=a.seed)
+              a.max_s1, a.aliases, a.workers, a.prefilter, seed=a.seed,
+              ambiguity_features=a.ambiguity_features)
     elif a.cmd == "train":
         train(a.pairs, a.ground_truth, a.out, one_to_one=not a.no_one_to_one,
               refit=a.refit, n_estimators=a.n_estimators, unseen=a.unseen,
-              drop=a.drop_features)
+              drop=a.drop_features, validation_from=a.validation_from,
+              fixed_prefilter=a.fixed_prefilter)
     elif a.cmd == "predict":
         predict(a.pairs, a.model, a.source1, a.out, a.threshold, a.candidates_out,
                 a.confident_out, a.confident_threshold)

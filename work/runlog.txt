@@ -1,7 +1,17 @@
 # (date | data | change | K | val macro F0.5 | oracle F0.5 | notes)
+2026-09-27 | original full-pool 10k holdout | baseline audit, prefilter before assignment | 50+25 | 0.96285086 (0.95613708 without filter) | 0.9899 before filter | false links 704 -> 401; missed links 2560 -> 2593; false singleton merges 47 -> 36
 2026-09-26 | mini 8000cl, old split (np.unique(left)) | baseline code as handed over, aliases v0 | 75 | 0.9869 | 0.9964 | 2000 val ents
 2026-09-26 | mini, new split (all queried entities) | new feats OFF (ablation), aliases v1 (word filter) | 75 | 0.9831 | 0.9955 | per-country thr
 2026-09-26 | mini, new split | + skeleton/compact/addr_skel + rev_rank/target_margin | 75 | 0.9842 | 0.9955 | +0.0011 = tie on mini (rule 3)
 2026-09-26 | mini, split v3 (sorted entities, stable from here) | + name channel (K all=50, name=25), name_block_* ctx feats, j->k skeleton | 50+25 (67 avg) | 0.9874 | 0.9989 | recall ceiling .9868 -> .9953; prefilter keeps 8.5% of pairs at -0.0004
 2026-09-26 | mini, split v3 | streaming sidecar (parts + meta), rev_rank -> 0/1/2 proxy from streamed top-2 | 50+25 | 0.9866 | 0.9989 | vs .9874 = noise; streamed stats verified exact
 2026-09-26 | FULL train pool, dev run: all 2.2M S1 queried, 200k stored, build --max-s1 40000 (30k train / 10k val ents) | first full-data numbers; per-country thr = tie | 50+25 (68.7 avg), recall .9708 | 0.9561 (model) / 0.9629 (+prefilter) | 0.9899 | India .9416, US .9659; FN-only 1887 vs FP-only 518
+
+2026-09-27 | 200k stored, original 10k holdout | larger_baseline, frozen baseline prefilter | 50+25 | 0.967382 | 0.988106 | classifier experiment
+
+2026-09-27 | 200k stored, original 10k holdout | ambiguity, frozen baseline prefilter | 50+25 | 0.969345 | 0.988106 | classifier experiment
+
+2026-09-27 | all 200k entities | refit selected larger_baseline; baseline prefilter frozen | 50+25 | 0.967382 BEFORE refit | 0.988106 | work/dev/model_optimized.pkl
+
+2026-09-27 | TEST 1.73M S1 (AWS blocking, 118.4M pairs) | build prefilter model40k -> 10.12M pairs; predict model_optimized | 50+25 | n/a (no test GT; dev 0.967382) | n/a | validator PASS (+check-ids); 6.10% empty, 3.26 mean links; France 6.13%/3.20
+2026-09-27 | TEST leaderboard | same submission as above | 50+25 | LB 0.958 (dev 0.967) | n/a | first leaderboard score; target 0.989 for next round

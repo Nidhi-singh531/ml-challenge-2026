@@ -1,0 +1,14 @@
+{
+  "experiment": "larger_baseline",
+  "model": "work/dev/model_optimized.pkl",
+  "model_sha256": "65157ce89a8f0951d29215ed5376cd25fb747d4909a92594a87fe48e42753a00",
+  "prefilter": "work/dev/model40k.pkl",
+  "ambiguity_features": false,
+  "validation_before_refit": {
+    "val": 0.9673822134159272,
+    "val_global": 0.9672328623712567,
+    "val_prefilter": 0.9673822134159272,
+    "oracle": 0.9881056459243976
+  },
+  "refit_entities": 200000
+}

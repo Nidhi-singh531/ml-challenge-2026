@@ -45,6 +45,8 @@ __pycache__/
 !/work/dev/*.err
 !/work/dev/*.ps1
 !/work/dev/model40k.pkl
+!/work/dev/model_optimized.pkl
+!/work/dev/classifier_*.json
 !/work/aws/
 /work/aws/*
 !/work/aws/*.sh

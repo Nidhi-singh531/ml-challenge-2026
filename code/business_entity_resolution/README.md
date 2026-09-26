@@ -7,8 +7,8 @@ scikit-learn (LightGBM and rapidfuzz optional). No external data, no network
 calls, no pretrained models.
 
 > This file is the full handoff context. If you are an agent picking this up:
-> read §2 (measured facts), §7 (rules) and §8 (status: **one refactor is half
-> done**) before changing anything. Several non-obvious decisions here were
+> read §2 (measured facts), §7 (rules) and §8 (streaming refactor complete;
+> classifier optimization complete, AWS test output pending) before changing anything. Several non-obvious decisions here were
 > driven by measurement, not intuition, and reverting them will silently cost
 > score.
 
@@ -248,8 +248,8 @@ python $s/blocking.py --data-dir dataset/test --prefix test --out output/cp_all.
   --name-gen-df-cap 20000 --cache work/tokcache_test.npz --workers 6
 python $s/pipeline.py build --data-dir dataset/test --prefix test `
   --cand-scores output/cp_all_scores --aliases work/aliases_full.tsv `
-  --prefilter work/model.pkl --out work/pairs_test.npz
-python $s/pipeline.py predict --pairs work/pairs_test.npz --model work/model.pkl `
+  --prefilter work/dev/model40k.pkl --out work/pairs_test.npz
+python $s/pipeline.py predict --pairs work/pairs_test.npz --model work/dev/model_optimized.pkl `
   --source1 dataset/test/test_source1.tsv --out output/matching_results.tsv `
   --candidates-out output/candidate_pairs.tsv --confident-out work/test_confident.tsv
 
@@ -545,21 +545,16 @@ under F₀.₅.
 
 1. ~~Full-data dev run → first validation number~~ **Done: 0.9629 with the
    prefilter** (see above).
-2. **Train on more data** (proposed, awaiting go-ahead). `build` all 200k
-   stored entities (~25 min), then train on ~150k and validate on ~50k. This
-   is the cheapest likely gain, and needed for the final model anyway.
-3. **Same-name ambiguity features** (the main missed-match cause). For
-   example: how many S1 entities share this exact core name, and whether this
-   S1 is the only / best claimant among them. New functions only; blocking
-   stays frozen.
-4. **Second stage over each entity's candidate list** (the old item 6). The
-   prefilter's +0.0068 is evidence that it pays. Stack out-of-fold stage-A
-   probabilities into entity-level features: max/sum of sibling
-   probabilities, agreement with confident siblings, probability-level
-   contention.
-5. Final model: `build` with `--prefilter`, `train --refit`, save as
-   `work/model.pkl`.
-6. Test run (§5.6, blocking on AWS) → validator `PASS` → upload.
+2. **Train on more data: done 27 Sep.** 190k train / original 10k holdout,
+   macro F0.5 **0.96738221**, with the frozen baseline prefilter.
+3. **Same-name ambiguity features: tested, not selected.** 0.96934548,
+   only +0.00196 over item 2; below the 0.003 adoption threshold.
+4. **Second-stage candidate-list model: deferred.** Prioritize the valid test
+   submission; any later stacking must use out-of-fold probabilities.
+5. **Final refit: done.** `work/dev/model_optimized.pkl`, all 200k entities.
+   Keep `work/dev/model40k.pkl` as the frozen prefilter and fallback model.
+6. ~~Test run (§5.6, blocking on AWS) → validator `PASS`~~ **Done 27 Sep**
+   (see "Test run" below). Remaining: package (§9) and upload.
 7. Test alias bootstrap (§5.6, optional block), especially to learn French
    abbreviations. The code exists but has never been run.
 8. Per-channel K and gen caps: **not needed**, since blocking is not the
@@ -580,6 +575,141 @@ under F₀.₅.
 `work/` and `.venv/` are excluded. For the methodology document, the numbers to
 quote are in §2 (EDA), §6 (blocking design) and §8 (results). Replace the mini
 numbers with full-pool validation numbers once §8 item 2 has run.
+
+## Classifier experiment (27 Sep, complete)
+
+The user authorized classifier optimization while AWS test blocking runs.
+`work/dev/model40k.pkl` remains the baseline and fixed stage-1 prefilter.
+Blocking, `ertext.py`, aliases, and blocking settings remain unchanged.
+
+New optional `build --ambiguity-features` appends 12 classifier-only features:
+same-country S1 core-name frequencies and explicit address coverage, length,
+and conflict evidence. Counts use all S1 records without ground-truth labels.
+The default 47-feature build remains compatible with the baseline model.
+
+`train --validation-from work/dev/pairs40k.npz` preserves the original 10k
+validation entities when training on more data. `--fixed-prefilter` preserves
+the original context filter instead of training a different filter on already
+filtered pairs. The build records its prefilter SHA256, checked during training
+and prediction; prediction also rejects mismatched feature schemas.
+
+The completed comparison uses the same original 10k holdout for every model.
+The baseline trained on 30k entities; the larger models trained on 190k.
+
+`src/classifier_experiment.py` runs the audit, filtered 200k feature build
+(3 workers), original-schema projection, and both models. Logs go to
+`work/dev/classifier_experiment.log`; metrics to `classifier_results.json`.
+The runner checks SHA256 of the frozen blocking inputs and baseline model.
+Regression checks are in `tests/test_classifier.py` (all six passed).
+
+Baseline audit reproduced **0.96285086** after filtering before assignment
+(unfiltered **0.95613708**). False links fall from 704 to 401; missed links
+rise from 2,560 to 2,593; false singleton merges fall from 47 to 36. The
+prefilter benefit is real on this holdout. Error analysis now uses the validation IDs
+saved in new model bundles, and rejects refitted models as held-out evidence.
+The experiment helper also supports a post-training comparison on identical
+shared-name and missing-address cohorts, including paired bootstrap intervals
+for the score difference. These intervals do not account for threshold tuning
+on this same validation set; scores remain development estimates.
+Regression cases include early rejection of incompatible feature schemas and
+prefilters. The baseline audit is also recorded in `work/runlog.txt`.
+Use `classifier_experiment.py --compare-only` for the detailed cohort report.
+Section 5.6 uses `work/dev/model40k.pkl` for filtering and
+`work/dev/model_optimized.pkl` for prediction. Do not add `--ambiguity-features`
+for the selected model, which uses the original 47 features.
+The comparison also recalibrates the original model's thresholds **after**
+the fixed prefilter (`work/dev/model40k_calibrated.pkl`). This cheap option
+must be compared with new training, since old thresholds were tuned before
+filtering. The original `model40k.pkl` is never overwritten.
+
+**Build completed:** 200,000 entities, 964,359 retained pairs (7.0% of
+13,740,903 candidates), 59 features in seven shards, 253 seconds. Retained
+true links: 669,553; link recall after filtering: 0.9662. Both training runs
+use 190,000 training entities and the original 10,000 validation entities.
+| Experiment | Held-out macro F0.5 | Decision |
+| --- | --- | --- |
+| Saved baseline + prefilter | 0.96285086 | Fallback |
+| Baseline, thresholds retuned after filter | 0.96285086 | No gain |
+| Larger training, original 47 features | **0.96738221** | **Selected** |
+| Larger training, 59 features | 0.96934548 | Extra +0.00196 is below 0.003 rule |
+
+Post-prefilter oracle: **0.98810565**. Selected thresholds: India 0.700,
+US 0.725; unseen country 0.725. Held-out model:
+`work/dev/model200k_larger_baseline.pkl`. Both experiments completed in
+400 seconds total. SHA256 checks
+confirmed that blocking, tokenization, aliases, and the baseline model stayed
+unchanged. AWS blocking outputs remain compatible.
+
+**Selection:** threshold-only recalibration gave no gain (0.96285086).
+Choose the 47-feature larger-data model: +0.00453136 versus baseline, with
+paired bootstrap 95% interval [0.00328, 0.00584] on this development holdout.
+False links fall **401 -> 287**, missed links **2593 -> 2420**, and false
+singleton merges **36 -> 23**. Shared-core-name entities (5,247) improve
+0.95282 -> 0.95736; entities with a retained empty-address candidate (2,311)
+improve 0.95434 -> 0.96013. These cohort counts are after filtering, unlike
+the original audit's before-filter empty-candidate cohort.
+
+The optional 59-feature model is preserved as an experiment, not selected:
+its extra gain is below 0.003 and it produces 310 false links versus 287.
+`classifier_experiment.py --finalize larger_baseline` refitted the selected
+classifier on all 200k entities, preserving its learned thresholds and the
+original frozen prefilter. Output: `work/dev/model_optimized.pkl`.
+Validation scores describe the held-out model **before** refitting; the
+refitted model must not be evaluated as if those labels were still unseen.
+Git ignore exceptions now retain the selected model and JSON experiment reports
+for the next Git backup. No second-stage stack is being added in this run.
+A saved-model smoke check (`tests/smoke_saved_model.py`) **passed** prediction,
+candidate export, empty-entity output, unique target assignment, and the
+organizer's validator on a 101-entity / 485-pair fixture. This does not validate
+the actual test submission, which still needs AWS output and a full test run.
+
+Reproduce from the workspace root (do not rerun blocking):
+
+```powershell
+$s = "code/business_entity_resolution/src"
+.venv/Scripts/python.exe -u $s/classifier_experiment.py
+.venv/Scripts/python.exe -u $s/classifier_experiment.py --compare-only
+.venv/Scripts/python.exe -u $s/classifier_experiment.py --finalize larger_baseline
+.venv/Scripts/python.exe -m unittest discover -s code/business_entity_resolution/tests -v
+.venv/Scripts/python.exe code/business_entity_resolution/tests/smoke_saved_model.py
+```
+
+Before refitting, error analysis can use the saved 190k-training model with
+`work/dev/pairs200k_filtered.npz`; it now reads the bundle's saved validation
+IDs. Full-test model competition and generalization to France are not measured
+by this sampled training holdout. AWS output download, test build/predict,
+organizer validation, and final submission remain outstanding.
+
+## Test run (27 Sep, complete, validator PASS)
+
+- **AWS blocking:** 1,732,544 S1 queried (France 259,452 / India 809,986 /
+  US 663,106), 118,437,763 pairs (68.4 per entity), 59 parts, 6,579 s on
+  m7i-flex.large. Frozen settings. Output in `output/cp_all_scores/`.
+- **Build** (`--prefilter work/dev/model40k.pkl`, 3 workers): 10,121,272 pairs
+  kept (8.5%), 47 features, 1,423 s → `work/pairs_test.npz`.
+- **Predict** (`work/dev/model_optimized.pkl`): thresholds France 0.725
+  (unseen → conservative), India 0.700, US 0.725. 5,019,247 links with
+  p ≥ 0.98 in `work/test_confident.tsv`.
+- **Validator:** PASS, also with `--check-ids`.
+
+| country | entities | empty % | mean links | sizes 0/1/2/3/4/5+ % |
+| --- | --- | --- | --- | --- |
+| France | 259,452 | 6.13 | 3.20 | 6.1/8.7/19.5/24.3/20.2/21.2 |
+| India | 809,986 | 6.28 | 3.23 | 6.3/8.6/19.1/23.8/20.2/22.2 |
+| US | 663,106 | 5.88 | 3.31 | 5.9/7.2/18.5/24.3/20.9/23.3 |
+| all | 1,732,544 | 6.10 | 3.26 | 6.1/8.1/18.9/24.1/20.4/22.4 |
+
+Train truth for comparison: 5.6% singletons, 3.46 mean. The prediction is
+slightly conservative, as expected under F0.5. France behaves like the seen
+countries. No test F0.5 is available locally; the dev estimate is 0.967.
+
+**Leaderboard (27 Sep, `matching_results.tsv` only): 0.958**, i.e. 0.009 below
+the dev estimate. Likely causes: France is unseen in training, the dev holdout
+sits on the training distribution, and the thresholds were tuned on that same
+holdout. The team's target for the next round is ≈ 0.989. Note that the dev
+oracle over the retained candidates is 0.988 and over all candidates 0.990, so
+that target needs gains in both the classifier and candidate recall. Leaderboard
+submissions currently take only the matching file; the final zip comes later.
 
 ## 10. Scale and memory
 

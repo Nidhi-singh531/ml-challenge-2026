@@ -1,0 +1,39 @@
+{
+  "frozen_sha256": {
+    "code/business_entity_resolution/src/blocking.py": "7c6e038ee72323f09ebd6ca1e39372695a5699bcaf170d887bc021e01ce27a03",
+    "code/business_entity_resolution/src/ertext.py": "796ca5a91c1587c939d06d12eb4ee5bc455222d8a775ad0f6876f614b87ad41a",
+    "work/aliases_full.tsv": "38cf1309de8161956dfb16935cb167ecc0cd3fab71435fb2f1609f0f0a08e79c",
+    "work/dev/model40k.pkl": "92fa37021cc8d0c1fb56c2fe18c6e540677e8f330c62d52d6cfc4013a76e0ecd"
+  },
+  "baseline": {
+    "unfiltered": {
+      "macro_f05": 0.956137084251295,
+      "false_singleton_merges": 47,
+      "false_links": 704,
+      "missed_links": 2560,
+      "entities_with_empty_candidate_f05": 0.954824162654726,
+      "empty_candidate_entities": 6339
+    },
+    "prefiltered": {
+      "macro_f05": 0.9628508555589061,
+      "false_singleton_merges": 36,
+      "false_links": 401,
+      "missed_links": 2593,
+      "entities_with_empty_candidate_f05": 0.9613599440637799,
+      "empty_candidate_entities": 6339
+    }
+  },
+  "larger_baseline": {
+    "val": 0.9673822134159272,
+    "val_global": 0.9672328623712567,
+    "val_prefilter": 0.9673822134159272,
+    "oracle": 0.9881056459243976
+  },
+  "ambiguity": {
+    "val": 0.9693454784563642,
+    "val_global": 0.9692663677124376,
+    "val_prefilter": 0.9693454784563642,
+    "oracle": 0.9881056459243976
+  },
+  "seconds": 400.0276162624359
+}
