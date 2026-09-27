@@ -1,0 +1,12 @@
+stage2 500/0.06/63 (as selected)             A 0.97121  B 0.97364  thr {'India': 0.7750000000000002, 'US': 0.7750000000000002}  (47s)
+stage2 1500/0.03/127                         A 0.97211  B 0.97306  thr {'India': 0.6500000000000002, 'US': 0.8500000000000003}  (224s)
+average of both                              A 0.97180  B 0.97357  thr {'India': 0.6250000000000002, 'US': 0.8000000000000003}  (225s)
+EF base lambda {'India': 0, 'US': 0}: A 0.97257  B 0.97330
+EF big lambda {'India': 0.35, 'US': 0}: A 0.97289  B 0.97343
+[stage2] OOF fold 0: fit 733237 / predict 182807
+[stage2] OOF fold 1: fit 733274 / predict 182770
+[stage2] OOF fold 2: fit 732386 / predict 183658
+[stage2] OOF fold 3: fit 732592 / predict 183452
+[stage2] OOF fold 4: fit 732687 / predict 183357
+stage3 (2nd coherence round) 500/0.06/63     A 0.97177  B 0.97371  thr {'India': 0.7000000000000003, 'US': 0.8000000000000003}  (548s)
+stage3 1500/0.03/127                         A 0.97208  B 0.97326  thr {'India': 0.6500000000000002, 'US': 0.7750000000000002}  (758s)

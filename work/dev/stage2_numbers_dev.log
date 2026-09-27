@@ -1,0 +1,12 @@
+[stage2] 964359 pairs, 190000 train / 10000 holdout entities
+[stage2] OOF fold 0: fit 733237 / predict 182807
+[stage2] OOF fold 1: fit 733274 / predict 182770
+[stage2] OOF fold 2: fit 732386 / predict 183658
+[stage2] OOF fold 3: fit 732592 / predict 183452
+[stage2] OOF fold 4: fit 732687 / predict 183357
+[stage2] loaded features work/dev/stage2_dev_features.npz
+[stage2] top importances: p1=1769, ent_n=1614, ent_psum=1518, ent_p2nd=1198, score_ratio_top=998, ent_pmax=994, coh_addr_max=978, block_score=970, target_margin=935, p1_gap=918, name_len_ratio=900, score_gap_next=865, rank=864, coh_name_tri_pw=831, name_block_score=830, n_candidates=744, name_ratio=738, name_tri_jacc=728, addr_tri_jacc=670, addr_token_set=660
+[stage2] stage1_threshold: A 0.96683  B 0.96769  all 0.96726  thr {'India': 0.7750000000000002, 'US': 0.7250000000000003}
+[stage2] stage2_threshold: A 0.97424  B 0.97634  all 0.97529  thr {'India': 0.5750000000000002, 'US': 0.6750000000000003}
+[stage2] stage2_ef: A 0.97494  B 0.97518  all 0.97506  lambda {'India': 0.2, 'US': 0.1}
+[stage2] selected threshold; saved work/dev/stage2_numbers.pkl (211s)

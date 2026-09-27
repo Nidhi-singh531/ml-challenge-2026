@@ -15,3 +15,13 @@
 
 2026-09-27 | TEST 1.73M S1 (AWS blocking, 118.4M pairs) | build prefilter model40k -> 10.12M pairs; predict model_optimized | 50+25 | n/a (no test GT; dev 0.967382) | n/a | validator PASS (+check-ids); 6.10% empty, 3.26 mean links; France 6.13%/3.20
 2026-09-27 | TEST leaderboard | same submission as above | 50+25 | LB 0.958 (dev 0.967) | n/a | first leaderboard score; target 0.989 for next round
+2026-09-27 | TEST leaderboard | stage2 (coherence + list feats), thresholds as tuned | 50+25 | LB 0.959 (dev 0.9726) | 0.988 | stage-2 dev gain mostly not transferred
+2026-09-27 | TEST leaderboard | stage2 thresholds shifted -0.05/+0.05/+0.10/+0.15 | 50+25 | LB 0.958/0.960/0.961/0.958 | n/a | best +0.10: test over-predicts (more distractor targets than train)
+2026-09-27 | dev 10k holdout | expansion (name-key lookup, FMAX 20) | 50+25 | half-B 0.97287 vs 0.97395 | n/a | hurts, dropped
+2026-09-27 | dev 10k holdout | bigger LGBM / avg / EF lambda<=1.5 / stage-3 coherence | 50+25 | half-B 0.9731-0.9737 vs 0.9736 | n/a | no gain, classifier saturated
+2026-09-27 | dev old / dev2 test-like, half-B | exp1 drop count feats | 50+25 | -0.0017 / -0.0008 | n/a | dropped
+2026-09-27 | dev old / dev2, half-B | exp2 joint-support coherence | 50+25 | -0.0001 / -0.0002 | n/a | dropped
+2026-09-27 | dev old / dev2, half-B | exp3 address-number evidence (extra_features.py) | 50+25 | +0.0029 / +0.0021 | n/a | KEPT: stage2_numbers.pkl, dev all 0.9753
+2026-09-27 | dev old / dev2, half-B | exp4 cross-script core after aliases | 50+25 | +0.0001 / -0.0001 | n/a | tie, dropped
+2026-09-27 | TEST files | C_numbers (+0.10), C_reject_only (0.961 minus 19,199 rejected links), C_numbers_samecount (+0.22) | 50+25 | LB pending | n/a | all validator PASS
+2026-09-27 | TEST leaderboard | C_reject_only / C_numbers_samecount (+0.22) / C_numbers (+0.10) | 50+25 | LB 0.962 / 0.965 / 0.963 | n/a | NEW BEST 0.965 = numbers model at 0.961 link count; installed in output/

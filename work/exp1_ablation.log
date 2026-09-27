@@ -1,0 +1,6 @@
+dev (old)          full      half-B 0.97341  false links 88  missed links 1044  thr {'India': 0.6750000000000003, 'US': 0.8250000000000003}
+dev (old)          no-count  half-B 0.97172  false links 101  missed links 1089  thr {'India': 0.7500000000000002, 'US': 0.7500000000000002}
+dev (old)          delta (no-count - full) -0.00169
+dev2 (test-like)   full      half-B 0.97031  false links 643  missed links 5244  thr {'India': 0.6500000000000002, 'US': 0.7000000000000003}
+dev2 (test-like)   no-count  half-B 0.96956  false links 715  missed links 5326  thr {'India': 0.7000000000000003, 'US': 0.6500000000000002}
+dev2 (test-like)   delta (no-count - full) -0.00076

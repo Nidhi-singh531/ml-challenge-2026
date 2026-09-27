@@ -1,0 +1,12 @@
+dev (old): extra features (964359, 11); unit_conflict rate 0.0797 (pos 0.0246 / neg 0.2048); core2 differs from core on 0.0561 of pairs
+dev (old)          full          half-B 0.97341  false links 88  missed links 1044  thr {'India': 0.6750000000000003, 'US': 0.8250000000000003}
+dev (old)          full+numbers  half-B 0.97634  false links 98  missed links 910  thr {'India': 0.5750000000000002, 'US': 0.6750000000000003}
+dev (old)          full+core2    half-B 0.97354  false links 73  missed links 1057  thr {'India': 0.7250000000000003, 'US': 0.8250000000000003}
+dev (old)          delta (full+numbers - full) +0.00293
+dev (old)          delta (full+core2 - full) +0.00013
+dev2 (test-like): extra features (1131303, 11); unit_conflict rate 0.0844 (pos 0.0251 / neg 0.1704); core2 differs from core on 0.0526 of pairs
+dev2 (test-like)   full          half-B 0.97031  false links 643  missed links 5244  thr {'India': 0.6500000000000002, 'US': 0.7000000000000003}
+dev2 (test-like)   full+numbers  half-B 0.97237  false links 597  missed links 5019  thr {'India': 0.6250000000000002, 'US': 0.6750000000000003}
+dev2 (test-like)   full+core2    half-B 0.97024  false links 563  missed links 5370  thr {'India': 0.7250000000000003, 'US': 0.7000000000000003}
+dev2 (test-like)   delta (full+numbers - full) +0.00205
+dev2 (test-like)   delta (full+core2 - full) -0.00007

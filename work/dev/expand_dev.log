@@ -1,0 +1,6 @@
+[expand] texts loaded (87s)
+[expand] 928504 new pairs for 200000 entities (186s)
+[expand] positives among new pairs: 1617 of 23440 links blocking/prefilter missed
+[expand] features (928504, 49); fitted (634s)
+[expand] base A 0.97136 B 0.97395 | with expansion (t=0.95) A 0.97138 B 0.97287
+[expand] saved work/dev/expand.pkl (945s)

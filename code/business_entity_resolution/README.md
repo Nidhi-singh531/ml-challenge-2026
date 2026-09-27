@@ -711,6 +711,57 @@ oracle over the retained candidates is 0.988 and over all candidates 0.990, so
 that target needs gains in both the classifier and candidate recall. Leaderboard
 submissions currently take only the matching file; the final zip comes later.
 
+## Stage 2 and leaderboard tuning (27 Sep)
+
+**Submitted (current best): leaderboard 0.965.**
+- Stage 2 plus the address-number features (`src/extra_features.py`, `NUM_NAMES`),
+  i.e. `work/dev/stage2_numbers.pkl`.
+- Thresholds shifted +0.22, which gives the same 3.25 links per entity as the
+  earlier 0.961 file.
+- Reproduce with `stage2.py predict --model work/dev/stage2_numbers.pkl --method
+  threshold --threshold-shift 0.22` on `work/pairs_test.npz`.
+- Dev: the full holdout scores 0.9753.
+  - Half B: 0.9734 → 0.9763.
+  - Test-like dev2, half B: 0.9703 → 0.9724.
+- Other uploads of the same model: plain +0.10 shift 0.963; the 0.961 file minus
+  the links this model rejects 0.962.
+- Blocking, aliases and the prefilter are unchanged (frozen).
+
+The earlier 0.961 file was stage 2 without the number features, with
+thresholds +0.10 (`work/dev/stage2.pkl`, `--threshold-shift 0.10`).
+
+- `src/stage2.py`: stage-1 probabilities (out-of-fold on dev), list features, and
+  candidate-to-candidate coherence; LightGBM on 63 features.
+  - Dev holdout half B: 0.9677 → 0.9734.
+  - Leaderboard: 0.958 → 0.959, and 0.961 with +0.10 thresholds.
+- Threshold-shift leaderboard curve (−0.05 … +0.15): 0.958, 0.959, 0.960,
+  **0.961**, 0.958.
+- EM prior-shift estimate on test: candidate pairs are 58–60% true matches,
+  against 69% on dev.
+  - Re-blocking train with 81% of S1 queried (`work/dev2/`) reproduces the 59%
+    rate.
+  - The submitted model scores 0.9694 there; a model retrained on it scored
+    0.9699 on dev but only 0.958 on the leaderboard (`D_realistic`).
+- Leaderboard probe with France rows emptied scored 0.827, which implies
+  India/US ≈ 0.962 and France ≈ 0.94 on test.
+- Not adopted:
+  - expected-F0.5 decoding;
+  - cluster expansion (`src/expand.py`, −0.001 dev);
+  - French alias bootstrap with France re-blocked (`src/country_subset.py`,
+    `work/fr/`; never uploaded);
+  - bigger or averaged stage-2 models and a stage-3 coherence round (±0.0006).
+- Every file tried is in `output/archive/`, and each leaderboard result is logged
+  in `work/runlog.txt`.
+
+Bounded experiments. Each was run separately on both dev sets, with half-B
+deltas given as old dev / dev2; blocking stayed frozen:
+1. candidate-count feature ablation: −0.0017 / −0.0008, dropped;
+2. joint-support coherence: −0.0001 / −0.0002, dropped;
+3. **address-number evidence** (alphanumeric numbers, unit conflicts):
+   **+0.0029 / +0.0021, kept**; leaderboard 0.965;
+4. cross-script core names (legal suffixes are dropped before aliases, so Indic
+   `प्राइवेट` → `private` stays in the core): +0.0001 / −0.0001, a tie, dropped.
+
 ## 10. Scale and memory
 
 | stage | time (measured / estimated) | memory |

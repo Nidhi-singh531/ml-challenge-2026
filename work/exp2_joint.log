@@ -1,0 +1,8 @@
+dev (old): joint features (964359, 3); share with joint evidence 0.750
+dev (old)          full        half-B 0.97341  false links 88  missed links 1044  thr {'India': 0.6750000000000003, 'US': 0.8250000000000003}
+dev (old)          full+joint  half-B 0.97331  false links 95  missed links 1013  thr {'India': 0.6500000000000002, 'US': 0.7750000000000002}
+dev (old)          delta (joint - full) -0.00010
+dev2 (test-like): joint features (1131303, 3); share with joint evidence 0.645
+dev2 (test-like)   full        half-B 0.97031  false links 643  missed links 5244  thr {'India': 0.6500000000000002, 'US': 0.7000000000000003}
+dev2 (test-like)   full+joint  half-B 0.97011  false links 663  missed links 5236  thr {'India': 0.6750000000000003, 'US': 0.6750000000000003}
+dev2 (test-like)   delta (joint - full) -0.00020

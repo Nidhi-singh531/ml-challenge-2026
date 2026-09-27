@@ -46,6 +46,9 @@ __pycache__/
 !/work/dev/*.ps1
 !/work/dev/model40k.pkl
 !/work/dev/model_optimized.pkl
+!/work/dev/stage2.pkl
+!/work/dev/stage2_numbers.pkl
+!/work/dev/stage2*_report.json
 !/work/dev/classifier_*.json
 !/work/aws/
 /work/aws/*
