@@ -7,41 +7,43 @@ An end-to-end, high-performance machine learning pipeline designed to resolve an
 ---
 
 ## 📌 Problem Statement (PS)
-In commercial data systems, business records arrive from multiple independent sources, each contributing partial, noisy fragments without shared unique keys. The goal is cross-source Entity Resolution (ER)[cite: 2]:
+In commercial data systems, business records arrive from multiple independent sources, each contributing partial, noisy fragments without shared unique keys. The goal is cross-source Entity Resolution (ER):
 
-* **Reference Authority:** `Source 1` is the deduplicated reference source[cite: 2]. For every `Source 1` record, the pipeline identifies all corresponding entity matches across `Source 2` and `Source 3`[cite: 2].
-* **Noise Patterns Handled:** Missing addresses, legal suffix discrepancies (Corp vs. Corporation, Pvt vs. Private)[cite: 2], transliterations, non-Latin Brahmic scripts[cite: 2], municipal number shifts, and co-tenant address collisions[cite: 2].
-* **Target Metric:** Macro-averaged $F_{0.5}$ computed per entity (including singletons)[cite: 2]:
+* **Reference Authority:** `Source 1` is the deduplicated reference source. For every `Source 1` record, the pipeline identifies all corresponding entity matches across `Source 2` and `Source 3`.
+* **Noise Patterns Handled:** Missing addresses, legal suffix discrepancies (Corp vs. Corporation, Pvt vs. Private), transliterations, non-Latin Brahmic scripts, municipal number shifts, and co-tenant address collisions.
+* **Target Metric:** Macro-averaged $F_{0.5}$ computed per entity (including singletons):
   $$F_{0.5} = \frac{1.25 \times \text{Precision} \times \text{Recall}}{0.25 \times \text{Precision} + \text{Recall}}$$
-  Precision is weighted $2\times$ over recall[cite: 2]; false merges on singletons severely penalize the score[cite: 2].
-* **Strict Constraints:** Self-contained execution, 100% language-agnostic logic, and zero external database/API lookups[cite: 2].
+  Precision is weighted $2\times$ over recall; false merges on singletons severely penalize the score.
+* **Strict Constraints:** Self-contained execution, 100% language-agnostic logic, and zero external database/API lookups.
 
 ---
 
 ## 🗂️ Dataset & Setup
 
-Due to file size constraints and challenge terms, the raw datasets are excluded from Git[cite: 1, 2].
+Due to file size constraints and challenge terms, the raw datasets are excluded from Git.
 
-* **Download Link:** [Download dataset.zip from Google Drive](https://drive.google.com/drive/folders/1mW9kGZ4xc1hNxj1mVebhn7zE2hh1bYGE?usp=sharing)
+* **Download Link:** [Download dataset.zip from Google Drive](YOUR_GOOGLE_DRIVE_LINK_HERE)
 * **Setup:** Download and extract the archive directly into the project root:
 
+```text
 ml-challenge-2026/
 └── dataset/
-├── train/
-│   ├── train_source1.tsv
-│   ├── train_source2.tsv
-│   ├── train_source3.tsv
-│   └── train_ground_truth.tsv
-└── test/
-├── test_source1.tsv
-├── test_source2.tsv
-└── test_source3.tsv
-
+    ├── train/
+    │   ├── train_source1.tsv
+    │   ├── train_source2.tsv
+    │   ├── train_source3.tsv
+    │   └── train_ground_truth.tsv
+    └── test/
+        ├── test_source1.tsv
+        ├── test_source2.tsv
+        └── test_source3.tsv
+```
 
 ---
 
 ## 📁 Repository Overview
 
+```text
 ml-challenge-2026/
 ├── dataset/                        # (Ignored) Train, test, and split data
 ├── output/                         # (Ignored) Generated matching_results.tsv & candidate_pairs.tsv
@@ -54,45 +56,47 @@ ml-challenge-2026/
 ├── Documentation_template.md        # Methodology write-up
 ├── RECOVERY.md                     # Checkpoint and artifact recovery procedures
 └── code/business_entity_resolution/
-├── README.md                   # Complete developer runbook & technical handoff
-├── requirements.txt            # Python dependencies
-├── src/                        # Complete modular pipeline source code
-└── tests/                      # Schema, model integrity, and regression tests
-
+    ├── README.md                   # Complete developer runbook & technical handoff
+    ├── requirements.txt            # Python dependencies
+    ├── src/                        # Complete modular pipeline source code
+    └── tests/                      # Schema, model integrity, and regression tests
+```
 
 ---
 
 ## ⚙️ The 3 Pipeline Stages
 
-         Raw Records (S1, S2, S3)
-                    │
-                    ▼
-  ┌────────────────────────────────────┐
-  │  Stage 1: Two-Channel Blocking     │
-  │  - stdlib Brahmic romanization     │
-  │  - Name-keys & joint tokens        │
-  │  - Two-tier sparse inverted index  │
-  └─────────────────┬──────────────────┘
-                    │ (~69 cands/entity)
-                    ▼
-  ┌────────────────────────────────────┐
-  │  Stage 2: Context Pre-Filtering    │
-  │  - Rapid contention statistics     │
-  │  - Drops 91.5% non-viable pairs    │
-  │  - Retains 99.9% candidate recall  │
-  └─────────────────┬──────────────────┘
-                    │ (Scored pairs)
-                    ▼
-  ┌────────────────────────────────────┐
-  │  Stage 3: Pairwise Scoring &       │
-  │           Coherence Matching       │
-  │  - 47 text & context features      │
-  │  - Street/unit number verification │
-  │  - 1-to-1 global claim assignment  │
-  └─────────────────┬──────────────────┘
-                    │
-                    ▼
-          Valid Submission TSVs
+```text
+             Raw Records (S1, S2, S3)
+                        │
+                        ▼
+      ┌────────────────────────────────────┐
+      │  Stage 1: Two-Channel Blocking     │
+      │  - stdlib Brahmic romanization     │
+      │  - Name-keys & joint tokens        │
+      │  - Two-tier sparse inverted index  │
+      └─────────────────┬──────────────────┘
+                        │ (~69 cands/entity)
+                        ▼
+      ┌────────────────────────────────────┐
+      │  Stage 2: Context Pre-Filtering    │
+      │  - Rapid contention statistics     │
+      │  - Drops 91.5% non-viable pairs    │
+      │  - Retains 99.9% candidate recall  │
+      └─────────────────┬──────────────────┘
+                        │ (Scored pairs)
+                        ▼
+      ┌────────────────────────────────────┐
+      │  Stage 3: Pairwise Scoring &       │
+      │           Coherence Matching       │
+      │  - 47 text & context features      │
+      │  - Street/unit number verification │
+      │  - 1-to-1 global claim assignment  │
+      └─────────────────┬──────────────────┘
+                        │
+                        ▼
+              Valid Submission TSVs
+```
 
 1. **Stage 1 — Two-Channel Blocking:** Combines a joint name+address index with an isolated name-key index (using consonant skeletons and prefix concatenations). A two-tier frequency cap isolates low-frequency tokens for candidate retrieval while using high-frequency tokens strictly for scoring.
 2. **Stage 2 — Context Pre-Filtering:** A lightweight GBDT built on contention statistics (claims per target, runner-up score margin) weeds out massive negative pair spaces before expensive string distance metrics are computed.
@@ -120,8 +124,10 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r code/business_entity_resolution/requirements.txt
 pip install rapidfuzz lightgbm
-2. Predict on Test Set
-PowerShell
+```
+
+### 2. Predict on Test Set
+```powershell
 $s = "code/business_entity_resolution/src"
 python $s/stage2.py predict `
   --model work/dev/stage2_numbers.pkl `
@@ -131,19 +137,20 @@ python $s/stage2.py predict `
   --source1 dataset/test/test_source1.tsv `
   --out output/matching_results.tsv `
   --candidates-out output/candidate_pairs.tsv
-3. Verify Submission
-Run the official challenge validator[cite: 2]:
+```
 
-PowerShell
+### 3. Verify Submission
+Run the official challenge validator:
+```powershell
 python utils/validate_submission.py `
   --matching output/matching_results.tsv `
   --candidate output/candidate_pairs.tsv `
   --test-dir dataset/test
-Expected output: PASS
+```
+*Expected output:* `PASS`
 
-[cite: 2]
+---
 
-📖 In-Depth Technical Documentation
-For full ablation logs, tokenization rules, memory-map scaling configurations, and internal experiment runlogs, see:
-
-👉 Detailed Engineering & Technical Handoff (code/business_entity_resolution/README.md)
+## 📖 In-Depth Technical Documentation
+For full ablation logs, tokenization rules, memory-map scaling configurations, and internal experiment runlogs, see:  
+👉 **[Detailed Engineering & Technical Handoff (`code/business_entity_resolution/README.md`)](code/business_entity_resolution/README.md)**
