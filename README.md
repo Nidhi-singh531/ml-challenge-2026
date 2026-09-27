@@ -22,7 +22,7 @@ In commercial data systems, business records arrive from multiple independent so
 
 Due to file size constraints and challenge terms, the raw datasets are excluded from Git[cite: 1, 2].
 
-* **Download Link:** [Download dataset.zip from Google Drive](YOUR_GOOGLE_DRIVE_LINK_HERE)
+* **Download Link:** [Download dataset.zip from Google Drive](https://drive.google.com/drive/folders/1mW9kGZ4xc1hNxj1mVebhn7zE2hh1bYGE?usp=sharing)
 * **Setup:** Download and extract the archive directly into the project root:
 
 ml-challenge-2026/
